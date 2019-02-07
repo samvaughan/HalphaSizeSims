@@ -20,8 +20,8 @@ parser.add_argument('SN', type=float)
 args = parser.parse_args()
 SN=args.SN
 
-if not os.path.exists('sims/outputs/XY/SN_{}'.format(SN)):
-    os.makedirs('sims/outputs/XY/SN_{}'.format(SN))
+if not os.path.exists('sims/outputs/XY/SN_{}'.format(int(SN))):
+    os.makedirs('sims/outputs/XY/SN_{}'.format(int(SN)))
 
 
 
@@ -63,7 +63,7 @@ for x, y in tqdm(zip(X.flatten(), Y.flatten()), total=len(X.flatten())):
         'Halpha_psf_filename':'mock_galaxy/Halpha_PSF.fits',
         'Halpha_model_output_filename':'{0}/Halpha_model_XY_SN_{1}.fits'.format(galaxy_directory, SN),
         'Halpha_residual_output_filename':'{0}/Halpha_residual_XY_SN_{1}.fits'.format(galaxy_directory, SN),
-        'Halpha_params_output_filename':'{0}/outputs/h/SN_{2}/H_{1:03d}_Halpha_single_fit_params_changing_XY_SN_{2}.dat'.format(galaxy_directory, i, int(SN))
+        'Halpha_params_output_filename':'{0}/outputs/XY/SN_{2}/H_{1:03d}_Halpha_single_fit_params_changing_XY_SN_{2}.dat'.format(galaxy_directory, i, int(SN))
         }
 
 
