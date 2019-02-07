@@ -70,7 +70,7 @@ def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_
     nrows=N_x*N_oversample
     ncols=N_y*N_oversample
 
-    model_image_name='modelimage.fits'
+    model_image_name='modelimage_{}.fits'.format(suffix)
     imfit_command = 'makeimage {0}/config.txt --nrows={1} --ncols={2} --psf={0}/Halpha_PSF.fits --output={0}/{3}'.format(outfolder, nrows, ncols, model_image_name)
     proc = subprocess.check_output(imfit_command.split(), stderr=subprocess.STDOUT)
     hdu=fits.open("{}/{}".format(outfolder, model_image_name))
