@@ -4,8 +4,9 @@ import subprocess
 from astropy.io import fits
 from  ppxf import ppxf_util as util
 import scipy.interpolate as si
-
 import scipy.constants as const
+import os
+
 from KMOS_tools import cube_tools as C
 
 def gaussian(x, x0, sigma, A):
@@ -49,10 +50,10 @@ def write_config(X, Y, Pa, ell, I0, h, filename):
 
 
 
-def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_level, Ha_velocity_dispersion, outfolder='/Users/vaughan/Science/KCLASH/Halpha_Sizes/Halpha_sims/mock_galaxy'):
+def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_level, Ha_velocity_dispersion, outfolder='mock_galaxy'):
 
     #Load a cube to get the right wavelength array
-    hdu=fits.open('/Data/KCLASH/Data/Sci/Final/COMBINE_SCI_RECONSTRUCTED_41309.fits')
+    hdu=fits.open(os.path.expanduser('z/Data/KCLASH/Data/Sci/Final/COMBINE_SCI_RECONSTRUCTED_41309.fits'))
     pri_header=hdu[0].header
     header=hdu[1].header
     noise_header=hdu[2].header
@@ -70,7 +71,7 @@ def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_
     ncols=N_y*N_oversample
 
     model_image_name='modelimage.fits'
-    imfit_command = 'makeimage {0}/config.txt --nrows={1} --ncols={2} --psf=/Users/vaughan/Science/KCLASH/Halpha_Sizes/imfit/MACS1931_BCG_59407/Halpha_PSF.fits --output={0}/{3}'.format(outfolder, nrows, ncols, model_image_name)
+    imfit_command = 'makeimage {0}/config.txt --nrows={1} --ncols={2} --psf={0}/Halpha_PSF.fits --output={0}/{3}'.format(outfolder, nrows, ncols, model_image_name)
     proc = subprocess.check_output(imfit_command.split(), stderr=subprocess.STDOUT)
     hdu=fits.open("{}/{}".format(outfolder, model_image_name))
     img=hdu[0].data
