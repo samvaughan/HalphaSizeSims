@@ -51,7 +51,7 @@ for i, sn in enumerate(tqdm(SNs)):
     'Halpha_psf_filename':'mock_galaxy/Halpha_PSF.fits',
     'Halpha_model_output_filename':'{}/Halpha_model_SN.fits'.format(galaxy_directory),
     'Halpha_residual_output_filename':'{0}/Halpha_residual_SN.fits'.format(galaxy_directory),
-    'Halpha_params_output_filename':'{0}/outputs/SN/SN_{3:03d}_Halpha_single_fit_params_changing_peak_SN.dat'.format(galaxy_directory, i),
+    'Halpha_params_output_filename':'{0}/outputs/SN/SN_{1:03d}_Halpha_single_fit_params_changing_peak_SN.dat'.format(galaxy_directory, i),
     }
 
     #Get a mask around H-alpha
