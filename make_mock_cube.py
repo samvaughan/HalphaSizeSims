@@ -50,10 +50,10 @@ def write_config(X, Y, Pa, ell, I0, h, filename):
 
 
 
-def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_level, Ha_velocity_dispersion, outfolder='mock_galaxy'):
+def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_level, Ha_velocity_dispersion, outfolder='mock_galaxy', suffix=""):
 
     #Load a cube to get the right wavelength array
-    hdu=fits.open(os.path.expanduser('z/Data/KCLASH/Data/Sci/Final/COMBINE_SCI_RECONSTRUCTED_41309.fits'))
+    hdu=fits.open(os.path.expanduser('~/z/Data/KCLASH/Data/Sci/Final/COMBINE_SCI_RECONSTRUCTED_41309.fits'))
     pri_header=hdu[0].header
     header=hdu[1].header
     noise_header=hdu[2].header
@@ -158,10 +158,10 @@ def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_
     data_HDU=fits.ImageHDU(final_cube, header=header)
     noise_HDU=fits.ImageHDU(final_noise_cube, header=noise_header)
     hdulist=fits.HDUList([fits.PrimaryHDU(header=pri_header), data_HDU, noise_HDU])
-    hdulist.writeto('{}/SimulatedCube.fits'.format(outfolder), overwrite=True)
+    hdulist.writeto('{}/SimulatedCube_{}.fits'.format(outfolder, suffix), overwrite=True)
 
 
-    KMOS_cube_object=C.Cube('{}/SimulatedCube.fits'.format(outfolder), is_sim=True)
+    KMOS_cube_object=C.Cube('{}/SimulatedCube_{}.fits'.format(outfolder, suffix), is_sim=True)
 
     return KMOS_cube_object
 

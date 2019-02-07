@@ -11,12 +11,21 @@ import measure_Halpha_size as MH
 import make_mock_cube as MG
 
 
+import argparse
+parser = argparse.ArgumentParser(description='Simulate H-alpha measurements with varying size at a given S/N')
+parser.add_argument('SN', type=float)
+
+args = parser.parse_args()
+SN=args.SN
+
+if not os.path.exists('sims/outputs/XY/SN_{}'.format(SN)):
+    os.makedirs('sims/outputs/XY/SN_{}'.format(SN))
+
+
 
 N_samples=1000
-SNs=np.logspace(0, 2, N_samples)
 
 #np.savetxt('SN_Values.txt', np.column_stack((np.arange(N_samples), SNs)))
-SN=10
 X, Y=np.indices((14, 14))
 
 for x, y in tqdm(zip(X.flatten(), Y.flatten()), total=len(X.flatten())):
@@ -31,13 +40,13 @@ for x, y in tqdm(zip(X.flatten(), Y.flatten()), total=len(X.flatten())):
 
     z=0.4 #Redshift
     peak_flux=2 #Times the continuum level
-    SN=10 #times the noise
+    
     sky_background_level=0.1 #Units of the peak continuum level
     Ha_velocity_dispersion=100.0#km/s
 
     for i in range(10):
 
-        cube=MG.make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_level, Ha_velocity_dispersion, outfolder='/Users/vaughan/Science/KCLASH/Halpha_Sizes/Halpha_sims/mock_galaxy')
+        cube=MG.make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_level, Ha_velocity_dispersion, outfolder='/Users/vaughan/Science/KCLASH/Halpha_Sizes/Halpha_sims/mock_galaxy', suffix="XY_SN_{}".format(int(SN)))
 
         # max_val=np.nanmax(cube.data)
         # cube.data=cube.data/max_val*1e-19
@@ -45,15 +54,16 @@ for x, y in tqdm(zip(X.flatten(), Y.flatten()), total=len(X.flatten())):
 
         galaxy_directory='sims'
         #Dictionary of all the filenames
-        filename_dict={'Halpha_image_filename':'{}/Halpha_image.fits'.format(galaxy_directory), 
+        filename_dict={'Halpha_image_filename':'{0}/Halpha_image_XY_SN_{1}.fits'.format(galaxy_directory, SN), 
         'Halpha_config':'Halpha_config.txt'.format(galaxy_directory),
-        'Halpha_mask_filename':'{0}/Halpha_mask.fits'.format(galaxy_directory),
-        'Halpha_noise_filename':'{0}/Halpha_noise.fits'.format(galaxy_directory),
+        'Halpha_mask_filename':'{0}/Halpha_mask_XY_SN_{1}.fits'.format(galaxy_directory, SN),
+        'Halpha_noise_filename':'{0}/Halpha_noise_XY_SN_{1}.fits'.format(galaxy_directory, SN),
         'Halpha_psf_filename':'/Users/vaughan/Science/KCLASH/Halpha_Sizes/imfit/MACS1931_BCG_59407/Halpha_PSF.fits',#Just picked one
-        'Halpha_model_output_filename':'{}/Halpha_model.fits'.format(galaxy_directory),
-        'Halpha_residual_output_filename':'{0}/Halpha_residual.fits'.format(galaxy_directory),
-        'Halpha_params_output_filename':'{0}/outputs/x_{1}_y_{2}_i_{3:03d}_Halpha_single_fit_params_changing_peak_SN.dat'.format(galaxy_directory, x, y, i),
+        'Halpha_model_output_filename':'{0}/Halpha_model_XY_SN_{1}.fits'.format(galaxy_directory, SN),
+        'Halpha_residual_output_filename':'{0}/Halpha_residual_XY_SN_{1}.fits'.format(galaxy_directory, SN),
+        'Halpha_params_output_filename':'{0}/outputs/h/SN_{2}/H_{1:03d}_Halpha_single_fit_params_changing_XY_SN_{2}.dat'.format(galaxy_directory, i, int(SN))
         }
+
 
         #Get a mask around H-alpha
         spec_mask=cube.get_spec_mask_around_wave(cube.Ha_lam, width=0.002)
