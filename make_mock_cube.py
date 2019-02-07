@@ -53,7 +53,7 @@ def write_config(X, Y, Pa, ell, I0, h, filename):
 def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_level, Ha_velocity_dispersion, outfolder='mock_galaxy', suffix=""):
 
     #Load a cube to get the right wavelength array
-    hdu=fits.open(os.path.realpath('~/z/Data/KCLASH/Data/Sci/Final/COMBINE_SCI_RECONSTRUCTED_41309.fits'))
+    hdu=fits.open(os.path.realpath(os.path.expanduser('~/z/Data/KCLASH/Data/Sci/Final/COMBINE_SCI_RECONSTRUCTED_41309.fits')))
     pri_header=hdu[0].header
     header=hdu[1].header
     noise_header=hdu[2].header
