@@ -8,12 +8,18 @@ import scipy.constants as const
 import os
 
 from KMOS_tools import cube_tools as C
+#Add path of our modules so we can import them
+import sys
+import os
+sys.path.append(os.path.expanduser('~/Science/KCLASH/Halpha_Sizes'))
+import measure_Halpha_size as MH
 
 def gaussian(x, x0, sigma, A):
     return A/np.sqrt(2*np.pi*sigma**2)*np.exp(-0.5*(x-x0)**2/sigma**2)
 
 
 def make_gaussian_spectrum(lamdas, continuum, z, sigma_kms, peak_flux):
+
 
 
     scale=sigma_kms/const.c*1000.0*np.sqrt(2*np.pi)
@@ -24,13 +30,13 @@ def make_gaussian_spectrum(lamdas, continuum, z, sigma_kms, peak_flux):
     #Come back to this!
     ha_pixel=np.argmin(np.abs(lamdas-0.65626*(1+z)))
     continuum_at_emission_line=np.mean(continuum[ha_pixel-10:ha_pixel+10])
-    log_spec=specNew+emission_line/continuum_at_emission_line*peak_flux
+    log_spec=specNew+emission_line*(continuum_at_emission_line)*(peak_flux-1) 
 
     interpolator=si.interp1d(np.exp(logLam), log_spec, bounds_error=False)
-    lin_spec=interpolator(lamdas)
-    lin_spec[~np.isfinite(lin_spec)]=np.nanmedian(lin_spec)
+    spectrum=interpolator(lamdas)
+    spectrum[~np.isfinite(spectrum)]=spectrum[-2]
     #Make the spectrum by combining the continuum and emission line
-    spectrum=continuum + lin_spec
+    # spectrum=continuum + lin_spec
 
     return spectrum
 
@@ -50,7 +56,7 @@ def write_config(X, Y, Pa, ell, I0, h, filename):
 
 
 
-def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_level, Ha_velocity_dispersion, outfolder='mock_galaxy', suffix=""):
+def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, Ha_velocity_dispersion, outfolder='mock_galaxy', suffix=""):
 
     #Load a cube to get the right wavelength array
     hdu=fits.open(os.path.realpath(os.path.expanduser('~/z/Data/KCLASH/Data/Sci/FINAL/COMBINE_SCI_RECONSTRUCTED_41309.fits')))
@@ -59,8 +65,10 @@ def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_
     noise_header=hdu[2].header
     N_oversample=1
 
-    N_lamdas, N_y, N_x=hdu[1].data.shape
-
+    #N_lamdas, N_y, N_x=hdu[1].data.shape
+    N_lamdas=2048
+    N_x=14
+    N_y=14
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #Make the model galaxy image
 
@@ -70,6 +78,7 @@ def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_
     nrows=N_x*N_oversample
     ncols=N_y*N_oversample
 
+    
     model_image_name='modelimage_{}.fits'.format(suffix)
     imfit_command = 'makeimage {0}/config.txt --nrows={1} --ncols={2} --psf={0}/Halpha_PSF.fits --output={0}/{3}'.format(outfolder, nrows, ncols, model_image_name)
     proc = subprocess.check_output(imfit_command.split(), stderr=subprocess.STDOUT)
@@ -82,7 +91,8 @@ def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #Sky background- no skylines here
     #Come back to this?
-    sky_background=np.abs(np.random.rand(N_lamdas, N_x*N_oversample, N_y*N_oversample)*sky_background_level)
+    #The 0.55 factor comes from putting in S/N values and seeing what we get out. 
+    sky_background=np.random.rand(N_lamdas, N_x*N_oversample, N_y*N_oversample)*(1./SN)*0.55
 
     #Add noise
     #noise=np.random.randn(N_lamdas, N_x*N_oversample, N_y*N_oversample)/SN_image+sky_background
@@ -131,16 +141,16 @@ def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_
 
     #Make the 3D cube
     cube=spectrum[:, None, None]*img[None, :, :]
-    noise_cube=cube/SN#(cube+sky_background_level)
+    noise_cube=sky_background#(cube+sky_background_level)/SN
     nc=np.random.randn(*cube.shape)*noise_cube
 
-    final_cube=(cube+nc+sky_background)*1e-19
+    final_cube=(cube+nc)*1e-19
     final_noise_cube=noise_cube*1e-19
     #noise_cube=((noisy_continuum)[:, None, None]*noisy_img[None, :, :])*1e-18/SN_image
 
 
 
-
+    #import ipdb; ipdb.set_trace()
     # #Downsample to KMOS resolution. Maybe do this at the beginning?
     # KMOS_res_cube=np.sum(np.sum(cube.reshape(N_lamdas, N_x, N_oversample, N_y, N_oversample), axis=4), axis=2)
     # KMOS_res_noise_cube=KMOS_res_cube/SN
@@ -162,6 +172,15 @@ def make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_
 
 
     KMOS_cube_object=C.Cube('{}/SimulatedCube_{}.fits'.format(outfolder, suffix), is_sim=True)
+
+    # r50_mask=img>0.5
+
+    # Haimg, cont_img=MH.make_Halpha_image(KMOS_cube_object)
+    # spec_mask=KMOS_cube_object.get_spec_mask_around_wave(KMOS_cube_object.Ha_lam, width=0.002)
+    # noise=np.sqrt(np.sum(KMOS_cube_object.noise[spec_mask, :, :]*KMOS_cube_object.noise[spec_mask, :, :], axis=0))
+
+    # S2N=np.ma.median(np.ma.array(Haimg/noise, mask=r50_mask))
+
 
     return KMOS_cube_object
 

@@ -18,7 +18,7 @@ args = parser.parse_args()
 SN=args.SN
 
 N_samples=1000
-Hs=np.linspace(0.3, 20, N_samples)
+Hs=np.linspace(0.5, 20, N_samples)
 
 
 if not os.path.exists('sims/outputs/h/SN_{}'.format(int(SN))):
@@ -42,7 +42,7 @@ for i, h in enumerate(tqdm(Hs)):
 
 
 
-    cube=MG.make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_level, Ha_velocity_dispersion, outfolder=os.path.expanduser('~/Science/KCLASH/Halpha_Sizes/Halpha_sims/mock_galaxy'), suffix="H_SN_{}".format(int(SN)))
+    cube=MG.make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, Ha_velocity_dispersion, outfolder=os.path.expanduser('~/Science/KCLASH/Halpha_Sizes/Halpha_sims/mock_galaxy'), suffix="H_SN_{}".format(int(SN)))
 
     # max_val=np.nanmax(cube.data)
     # cube.data=cube.data/max_val*1e-19

@@ -15,7 +15,7 @@ import make_mock_cube as MG
 
 
 N_samples=1000
-SNs=np.logspace(0, 2, N_samples)
+SNs=np.logspace(0, 1.5, N_samples)
 
 
 for i, sn in enumerate(tqdm(SNs)):
@@ -31,12 +31,11 @@ for i, sn in enumerate(tqdm(SNs)):
     z=0.4 #Redshift
     peak_flux=2 #Times the continuum level
     SN=sn #times the noise
-    sky_background_level=0.1 #Units of the peak continuum level
     Ha_velocity_dispersion=100.0#km/s
 
 
 
-    cube=MG.make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, sky_background_level, Ha_velocity_dispersion, outfolder=os.path.expanduser('~/Science/KCLASH/Halpha_Sizes/Halpha_sims/mock_galaxy'))
+    cube=MG.make_mock_cube(Xcen, Ycen, PA, ell, I0, h, z, peak_flux, SN, Ha_velocity_dispersion, outfolder=os.path.expanduser('~/Science/KCLASH/Halpha_Sizes/Halpha_sims/mock_galaxy'))
 
     # max_val=np.nanmax(cube.data)
     # cube.data=cube.data/max_val*1e-19
